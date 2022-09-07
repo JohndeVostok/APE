@@ -3,7 +3,9 @@
 #include "curand.h"
 #include "kernel.h"
 
-void test_error(int m, int n, int k, ape::ApeAlgo algo) {
+namespace ape {
+namespace test {
+void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
     float *data_eval_a = 0, *data_eval_b = 0, *data_eval_c = 0;
     cudaSafeCall(cudaMalloc((void **)&data_eval_a, m * k * sizeof(float)));
     cudaSafeCall(cudaMalloc((void **)&data_eval_b, k * n * sizeof(float)));
@@ -61,13 +63,5 @@ void test_error(int m, int n, int k, ape::ApeAlgo algo) {
     cudaFree(data_res_c);
 }
 
-int main() {
-    ape::apeInit();
-    test_error(128, 128, 128, ape::APE_ALGO_CUBLAS);
-    test_error(256, 256, 256, ape::APE_ALGO_CUBLAS);
-    test_error(512, 512, 512, ape::APE_ALGO_CUBLAS);
-    test_error(1024, 1024, 1024, ape::APE_ALGO_CUBLAS);
-    test_error(2048, 2048, 2048, ape::APE_ALGO_CUBLAS);
-    test_error(4096, 4096, 4096, ape::APE_ALGO_CUBLAS);
-    test_error(8192, 8192, 8192, ape::APE_ALGO_CUBLAS);
-}
+} // namespace test
+} // namespace ape

@@ -3,11 +3,13 @@
 #include <cassert>
 #include <cstring>
 #include <cublas_v2.h>
+#include <cuda_runtime.h>
 #include <iostream>
 
 namespace ape {
 
 extern cublasHandle_t ape_cublas_handle;
+extern cudaDeviceProp ape_gpu_prop;
 
 void apeInit();
 
@@ -41,6 +43,7 @@ enum ApeAlgo {
     APE_ALGO_CUBLAS,
     APE_ALGO_FP32F,
     APE_ALGO_FP32B,
+    APE_ALGO_FP32T,
     APE_ALGO_INT16,
 };
 
