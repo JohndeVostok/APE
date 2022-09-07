@@ -1,3 +1,4 @@
+.vscode/
 build/
 env*
 .clang-format
