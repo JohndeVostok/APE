@@ -21,10 +21,10 @@ void apeGemmFP32(ApeTrans transa, ApeTrans transb, int m, int n, int k, const fl
         gemm_fp32_cublas(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     case APE_ALGO_FP32F:
-        ape_error("Not impl.");
+        gemm_fp32_fp16(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     case APE_ALGO_FP32B:
-        ape_error("Not impl.");
+        gemm_fp32_bf16(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     default:
         ape_error("Invalid algo.");
@@ -38,7 +38,7 @@ void apeGemmINT16(ApeTrans transa, ApeTrans transb, int m, int n, int k, const i
         ape_error("Not impl.");
         break;
     case APE_ALGO_INT16:
-        ape_error("Not impl.");
+        gemm_int16_int8(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     default:
         ape_error("Invalid algo.");

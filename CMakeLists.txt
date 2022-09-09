@@ -11,7 +11,7 @@ set(CUDA_VERBOSE_BUILD on)
 include_directories(include)
 add_subdirectory("src")
 
-set(TESTS test_fp32_cublas)
+set(TESTS test_fp32_cublas test_fp32_fp16 test_fp32_bf16)
 foreach(TEST IN LISTS TESTS)
     cuda_add_executable(${TEST} test/${TEST}.cpp)
     target_link_libraries(${TEST} ape -lcublas -lcurand)
