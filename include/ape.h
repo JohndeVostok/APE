@@ -13,6 +13,6 @@ void apeGemmFP64(ApeTrans transa, ApeTrans transb, int m, int n, int k, const do
                  const double *B, int ldb, const double *beta, double *C, int ldc, ApeAlgo algo = APE_ALGO_AUTO);
 
 void apeGemmINT16(ApeTrans transa, ApeTrans transb, int m, int n, int k, const int16_t *alpha, const int16_t *A, int lda,
-                  const int16_t *B, int ldb, const int16_t *beta, int16_t *C, int ldc, ApeAlgo algo = APE_ALGO_AUTO);
+                  const int16_t *B, int ldb, const int32_t *beta, int32_t *C, int ldc, ApeAlgo algo = APE_ALGO_AUTO);
 
 } // namespace ape

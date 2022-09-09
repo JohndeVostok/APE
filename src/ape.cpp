@@ -21,10 +21,13 @@ void apeGemmFP32(ApeTrans transa, ApeTrans transb, int m, int n, int k, const fl
         gemm_fp32_cublas(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     case APE_ALGO_FP32F:
-        ape_error("Not impl.");
+        gemm_fp32_fp32f(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     case APE_ALGO_FP32B:
-        ape_error("Not impl.");
+        gemm_fp32_fp32b(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+        break;
+    case APE_ALGO_FP32T:
+        gemm_fp32_fp32t(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     default:
         ape_error("Invalid algo.");
@@ -32,13 +35,13 @@ void apeGemmFP32(ApeTrans transa, ApeTrans transb, int m, int n, int k, const fl
 }
 
 void apeGemmINT16(ApeTrans transa, ApeTrans transb, int m, int n, int k, const int16_t *alpha, const int16_t *A, int lda,
-                  const int16_t *B, int ldb, const int16_t *beta, int16_t *C, int ldc, ApeAlgo algo) {
+                  const int16_t *B, int ldb, const int32_t *beta, int32_t *C, int ldc, ApeAlgo algo) {
     switch (algo) {
     case APE_ALGO_AUTO:
         ape_error("Not impl.");
         break;
     case APE_ALGO_INT16:
-        ape_error("Not impl.");
+        gemm_int16_int8(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     default:
         ape_error("Invalid algo.");

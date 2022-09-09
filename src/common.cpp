@@ -6,6 +6,7 @@ namespace ape {
 cublasHandle_t ape_cublas_handle = nullptr;
 cudaDeviceProp ape_gpu_prop;
 
+//TODO: initialize for buffer
 void apeInit() {
     if (ape_cublas_handle == nullptr) {
         cublasSafeCall(cublasCreate(&ape_cublas_handle));
