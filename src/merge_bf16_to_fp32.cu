@@ -3,7 +3,7 @@
 
 namespace ape {
 
-__global__ void kernel_convert_bf16_to_fp32(float *dst, const __nv_bfloat16 *src, 
+__global__ void kernel_merge_bf16_to_fp32(float *dst, const __nv_bfloat16 *src, 
                                 uint32_t size) {
     uint32_t base = 2 * (blockIdx.x * blockDim.x + threadIdx.x);
     uint32_t step = 2 * blockDim.x * gridDim.x;
@@ -22,11 +22,11 @@ __global__ void kernel_convert_bf16_to_fp32(float *dst, const __nv_bfloat16 *src
     return;
 }
 
-void convert_bf16_to_fp32(float *dst, const __nv_bfloat16 *src, 
+void merge_bf16_to_fp32(float *dst, const __nv_bfloat16 *src, 
                                 uint32_t size) {
     dim3 grid_size(NUM_SM, 1);
     dim3 block_size(MAX_THREAD, 1);
-    kernel_convert_bf16_to_fp32<<<grid_size, block_size>>>(dst, src, size);
+    kernel_merge_bf16_to_fp32<<<grid_size, block_size>>>(dst, src, size);
     cudaCheckError();
 }
 

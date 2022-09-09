@@ -9,8 +9,8 @@ void gemm_fp32_bf16(ApeTrans transa, ApeTrans transb, int m, int n, int k, const
     //cudaSafeCall(cudaMalloc((void**) &bf16_A, sizeof(__nv_bfloat16) * m * k * 3));
     //cudaSafeCall(cudaMalloc((void**) &bf16_B, sizeof(__nv_bfloat16) * k * n * 3));
 
-    convert_fp32_to_bf16(bf16_A, A, m*k);
-    convert_fp32_to_bf16(bf16_B, B, k*n);
+    split_fp32_to_bf16(bf16_A, A, m*k);
+    split_fp32_to_bf16(bf16_B, B, k*n);
 
     float beta0 = *beta, beta1 = 1;
     cublasSafeCall(cublasGemmEx(ape_cublas_handle, cublasOperation_t(transa), cublasOperation_t(transb), m, n, k, alpha, bf16_A, CUDA_R_16BF, 

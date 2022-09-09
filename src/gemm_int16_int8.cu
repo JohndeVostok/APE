@@ -12,8 +12,8 @@ void gemm_int16_int8(ApeTrans transa, ApeTrans transb, int m, int n, int k, cons
     //cudaSafeCall(cudaMalloc((void**) &int8_B, sizeof(int8_t) * k * n * 2));
     //cudaSafeCall(cudaMalloc((void**) &int32_C, sizeof(int32_t) * m * n));
 
-    convert_int16_to_int8(int8_A, A, m*k);
-    convert_int16_to_int8(int8_B, B, k*n);
+    split_int16_to_int8(int8_A, A, m*k);
+    split_int16_to_int8(int8_B, B, k*n);
     convert_int16_to_int32(int32_C, C, m*n);
 
     int alpha0 = *alpha * 256 * 256, alpha1 = *alpha * 256, alpha2 = *alpha;
