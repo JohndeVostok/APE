@@ -1,12 +1,10 @@
-<<<<<<< HEAD:src/test/test_gemm_fp32.cpp
 #include "ape.h"
 #include "cuda_utils.h"
 #include "curand.h"
 #include "kernel.h"
 
-namespace ape {
 namespace test {
-void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
+void test_error(int m, int n, int k, ape::ApeAlgo algo) {
     float *data_eval_a = 0, *data_eval_b = 0, *data_eval_c = 0;
     cudaSafeCall(cudaMalloc((void **)&data_eval_a, m * k * sizeof(float)));
     cudaSafeCall(cudaMalloc((void **)&data_eval_b, k * n * sizeof(float)));
@@ -65,18 +63,3 @@ void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
 }
 
 } // namespace test
-} // namespace ape
-=======
-#include "test_fp32.h"
-
-int main() {
-    ape::apeInit(8192 * 8192 * sizeof(float) * 4);
-    test::test_error(128, 128, 128, ape::APE_ALGO_CUBLAS);
-    test::test_error(256, 256, 256, ape::APE_ALGO_CUBLAS);
-    test::test_error(512, 512, 512, ape::APE_ALGO_CUBLAS);
-    test::test_error(1024, 1024, 1024, ape::APE_ALGO_CUBLAS);
-    test::test_error(2048, 2048, 2048, ape::APE_ALGO_CUBLAS);
-    test::test_error(4096, 4096, 4096, ape::APE_ALGO_CUBLAS);
-    test::test_error(8192, 8192, 8192, ape::APE_ALGO_CUBLAS);
-}
->>>>>>> 3b1354d (dev: implement APE_ALGO_FP32F, APE_ALGO_FP32B, APE_ALGO_INT16):test/test_fp32_cublas.cpp

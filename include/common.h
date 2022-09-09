@@ -11,11 +11,15 @@ namespace ape {
 extern cublasHandle_t ape_cublas_handle;
 extern cudaDeviceProp ape_gpu_prop;
 
-void apeInit();
+void apeInit(size_t);
+void apeFinal();
 
 #define ape_error(str) __ape_error(str, __FILE__, __LINE__)
 #define ape_warning(str) __ape_warning(str, __FILE__, __LINE__)
 #define ape_info(str) __ape_info(str, __FILE__, __LINE__)
+
+#define NUM_SM 108
+#define MAX_THREAD 1024
 
 inline void __ape_error(std::string str, const char *file, const int line) {
     std::cout << "[ERROR] " << file << "::" << line << " " << str << std::endl;
