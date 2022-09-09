@@ -9,4 +9,5 @@ int main() {
     test::test_error(2048, 2048, 2048, ape::APE_ALGO_CUBLAS);
     test::test_error(4096, 4096, 4096, ape::APE_ALGO_CUBLAS);
     test::test_error(8192, 8192, 8192, ape::APE_ALGO_CUBLAS);
+    ape::apeFinal();
 }
