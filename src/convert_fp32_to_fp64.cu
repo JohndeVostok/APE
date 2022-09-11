@@ -16,9 +16,9 @@ __global__ void kernel_convert_fp32_to_fp64(double *dst, float *src, size_t size
 }
 
 void convert_fp32_to_fp64(double *dst, float *src, size_t size) {
-    dim3 gridSize(108, 1);
-    dim3 blockSize(1024, 1);
-    kernel_convert_fp32_to_fp64<<<gridSize, blockSize>>>(dst, src, size);
+    dim3 grid_size(NUM_SM, 1);
+    dim3 block_size(MAX_THREAD, 1);
+    kernel_convert_fp32_to_fp64<<<grid_size, block_size>>>(dst, src, size);
     cudaCheckError();
 }
 
