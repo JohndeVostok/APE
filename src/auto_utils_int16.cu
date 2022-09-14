@@ -2,7 +2,7 @@
 #include "kernel.h"
 
 namespace ape {
-__global__ void kernel_create_mask_a(const float *src, size_t m, size_t k, ApeTrans transa,
+__global__ void kernel_create_mask_a_int16(const int16_t *src, size_t m, size_t k, ApeTrans transa,
                                                int *mask) {
     extern __shared__ char smem[];
     int *shmem = (int *)&smem[0];
@@ -14,7 +14,7 @@ __global__ void kernel_create_mask_a(const float *src, size_t m, size_t k, ApeTr
         return;
     }
 
-    const float* base;
+    const int16_t* base;
     size_t step;
     if (transa == APE_TRANS_T) {    
         base = src + blockIdx.x * AUTO_BLOCK * k +
@@ -27,8 +27,8 @@ __global__ void kernel_create_mask_a(const float *src, size_t m, size_t k, ApeTr
 
     int flag = 1;
     for (int i = 0; i < AUTO_BLOCK; i++) {
-        float tmp = fabs(base[i * step]);
-        if (tmp < FP16_MIN || tmp > FP16_MAX) {
+        int16_t tmp = fabs(base[i * step]);
+        if (tmp > INT16C_MAX) {
             flag = 0;
         }
     }
@@ -56,18 +56,18 @@ __global__ void kernel_create_mask_a(const float *src, size_t m, size_t k, ApeTr
     }
 }
 
-void create_mask_a(const float *src, size_t m, size_t k, ApeTrans transa,
+void create_mask_a_int16(const int16_t *src, size_t m, size_t k, ApeTrans transa,
                                                int *mask) {
     dim3 grid((m - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
     dim3 block(1, AUTO_CHUNK, 1);
 
-    kernel_create_mask_a<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int)>>>(src, m, k, transa, mask);
+    kernel_create_mask_a_int16<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int)>>>(src, m, k, transa, mask);
 
     cudaCheckError();
 }
 
 
-__global__ void kernel_create_mask_b(const float *src, size_t k, size_t n, ApeTrans transb,
+__global__ void kernel_create_mask_b_int16(const int16_t *src, size_t k, size_t n, ApeTrans transb,
                                                int *mask) {
     extern __shared__ char smem[];
     int *shmem = (int *)&smem[0];
@@ -79,7 +79,7 @@ __global__ void kernel_create_mask_b(const float *src, size_t k, size_t n, ApeTr
         return;
     }
 
-    const float* base;
+    const int16_t* base;
     size_t step;
     if (transb == APE_TRANS_N) {
         base = src + blockIdx.x * AUTO_BLOCK * k +
@@ -93,8 +93,8 @@ __global__ void kernel_create_mask_b(const float *src, size_t k, size_t n, ApeTr
 
     int flag = 1;
     for (int i = 0; i < AUTO_BLOCK; i++) {
-        float tmp = fabs(base[i * step]);
-        if (tmp < FP16_MIN || tmp > FP16_MAX) {
+        int16_t tmp = fabs(base[i * step]);
+        if (tmp > INT16C_MAX) {
             flag = 0;
         }
     }
@@ -122,12 +122,12 @@ __global__ void kernel_create_mask_b(const float *src, size_t k, size_t n, ApeTr
     }
 }
 
-void create_mask_b(const float *src, size_t k, size_t n, ApeTrans transb,
+void create_mask_b_int16(const int16_t *src, size_t k, size_t n, ApeTrans transb,
                                                int *mask) {
     dim3 grid((n - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
     dim3 block(1, AUTO_CHUNK, 1);
 
-    kernel_create_mask_b<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int)>>>(src, k, n, transb, mask);
+    kernel_create_mask_b_int16<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int)>>>(src, k, n, transb, mask);
 
     cudaCheckError();
 }
