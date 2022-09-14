@@ -16,7 +16,6 @@ __global__ void kernel_split_int16_to_int8(int8_t *dst, const int16_t *src, size
         buf[1].y = char((base.y - int16_t(buf[0].y)) / 256);
         buf[1].z = char((base.z - int16_t(buf[0].z)) / 256);
         buf[1].w = char((base.w - int16_t(buf[0].w)) / 256);
-
         (char4 &)dst[i] = buf[1];
         (char4 &)dst[size + i] = buf[0];
     }
@@ -26,7 +25,6 @@ __global__ void kernel_split_int16_to_int8(int8_t *dst, const int16_t *src, size
 void split_int16_to_int8(int8_t *dst, const int16_t *src, size_t size) {
     dim3 grid(NUM_SM, 1, 1);
     dim3 block(MAX_THREAD, 1, 1);
-
     kernel_split_int16_to_int8<<<grid, block>>>(dst, src, size);
     cudaCheckError();
 }

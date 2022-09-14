@@ -17,7 +17,11 @@ void apeGemmFP32(ApeTrans transa, ApeTrans transb, int m, int n, int k, const fl
                  const float *B, int ldb, const float *beta, float *C, int ldc, const ApeAlgo algo) {
     switch (algo) {
     case APE_ALGO_AUTO:
-        assert(false);
+        gemm_fp32_auto(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+        break;
+    case APE_ALGO_AUTO_STRICT:
+        gemm_fp32_auto_strict(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+        break;
     case APE_ALGO_CUBLAS:
         gemm_fp32_cublas(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
@@ -53,6 +57,9 @@ void apeGemmINT16(ApeTrans transa, ApeTrans transb, int m, int n, int k, const i
                   const int16_t *B, int ldb, const int32_t *beta, int32_t *C, int ldc, ApeAlgo algo) {
     switch (algo) {
     case APE_ALGO_AUTO:
+        // TODO: check layout
+        assert(count_overflow_int16emu(A, m, k) == 0);
+        assert(count_overflow_int16emu(B, k, n) == 0);
         gemm_int16_emu(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     case APE_ALGO_INT16:

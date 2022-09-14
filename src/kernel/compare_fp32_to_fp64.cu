@@ -1,4 +1,3 @@
-#include "common.h"
 #include "kernel.h"
 
 namespace ape {
