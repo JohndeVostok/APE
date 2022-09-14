@@ -2,7 +2,7 @@
 #include "kernel.h"
 
 namespace ape {
-__global__ void kernel_create_mask_a(float *src, size_t m, size_t k, ApeTrans transa,
+__global__ void kernel_create_mask_a(const float *src, size_t m, size_t k, ApeTrans transa,
                                                int *mask) {
     extern __shared__ char smem[];
     int *shmem = (int *)&smem[0];
@@ -14,8 +14,8 @@ __global__ void kernel_create_mask_a(float *src, size_t m, size_t k, ApeTrans tr
         return;
     }
 
-    float* base;
-    int step;
+    const float* base;
+    size_t step;
     if (transa == APE_TRANS_T) {    
         base = src + blockIdx.x * AUTO_BLOCK * k +
                     blockIdx.y * AUTO_CHUNK + threadIdx.y;
@@ -56,7 +56,7 @@ __global__ void kernel_create_mask_a(float *src, size_t m, size_t k, ApeTrans tr
     }
 }
 
-void create_mask_a(float *src, size_t m, size_t k, ApeTrans transa,
+void create_mask_a(const float *src, size_t m, size_t k, ApeTrans transa,
                                                int *mask) {
     dim3 grid((m - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
     dim3 block(1, AUTO_CHUNK, 1);
@@ -67,7 +67,7 @@ void create_mask_a(float *src, size_t m, size_t k, ApeTrans transa,
 }
 
 
-__global__ void kernel_create_mask_b(float *src, size_t k, size_t n, ApeTrans transb,
+__global__ void kernel_create_mask_b(const float *src, size_t k, size_t n, ApeTrans transb,
                                                int *mask) {
     extern __shared__ char smem[];
     int *shmem = (int *)&smem[0];
@@ -79,8 +79,8 @@ __global__ void kernel_create_mask_b(float *src, size_t k, size_t n, ApeTrans tr
         return;
     }
 
-    float* base;
-    int step;
+    const float* base;
+    size_t step;
     if (transb == APE_TRANS_N) {
         base = src + blockIdx.x * AUTO_BLOCK * k +
                     blockIdx.y * AUTO_CHUNK + threadIdx.y;
@@ -122,7 +122,7 @@ __global__ void kernel_create_mask_b(float *src, size_t k, size_t n, ApeTrans tr
     }
 }
 
-void create_mask_b(float *src, size_t k, size_t n, ApeTrans transb,
+void create_mask_b(const float *src, size_t k, size_t n, ApeTrans transb,
                                                int *mask) {
     dim3 grid((n - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
     dim3 block(1, AUTO_CHUNK, 1);
