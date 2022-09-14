@@ -5,6 +5,8 @@ namespace ape {
 
 constexpr int NUM_SM = 108;
 constexpr int MAX_THREAD = 1024;
+constexpr int AUTO_BLOCK = 128;
+constexpr int AUTO_CHUNK = 64;
 
 void gemm_fp32_auto(ApeTrans transa, ApeTrans transb, int m, int n, int k, const float *alpha, const float *A, int lda,
                     const float *B, int ldb, const float *beta, float *C, int ldc);
@@ -36,4 +38,8 @@ void split_fp32_to_tf32(float *dst, const float *src, size_t size);
 void merge_tf32_to_fp32(float *dst, const float *src, size_t size);
 void split_int16_to_int8(int8_t* dst, const int16_t* src, size_t size);
 void merge_int8_to_int16(int16_t* dst, const int8_t* src, size_t size);
+
+void create_mask_a(float *src, size_t m, size_t k, ApeTrans transa, int *mask);
+void create_mask_b(float *src, size_t k, size_t n, ApeTrans transb, int *mask);
+
 } // namespace ape

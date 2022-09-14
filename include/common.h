@@ -47,4 +47,6 @@ enum ApeAlgo {
     APE_ALGO_INT16,
 };
 
+#define FP16_MAX 65504.0f
+#define FP16_MIN 3.1e-5f
 } // namespace ape
