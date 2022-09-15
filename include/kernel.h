@@ -39,9 +39,9 @@ void merge_tf32_to_fp32(float *dst, const float *src, size_t size);
 void split_int16_to_int8(int8_t* dst, const int16_t* src, size_t size);
 void merge_int8_to_int16(int16_t* dst, const int8_t* src, size_t size);
 
-void create_mask_a_fp32(const float *src, size_t m, size_t k, ApeTrans transa, int *mask);
-void create_mask_b_fp32(const float *src, size_t k, size_t n, ApeTrans transb, int *mask);
-void create_mask_a_int16(const int16_t *src, size_t m, size_t k, ApeTrans transa, int *mask);
-void create_mask_b_int16(const int16_t *src, size_t k, size_t n, ApeTrans transb, int *mask);
+void create_mask_a_fp32(const float *src, size_t m, size_t k, ApeTrans transa, int8_t *mask);
+void create_mask_b_fp32(const float *src, size_t k, size_t n, ApeTrans transb, int8_t *mask);
+void create_mask_a_int16(const int16_t *src, size_t m, size_t k, ApeTrans transa, int8_t *mask);
+void create_mask_b_int16(const int16_t *src, size_t k, size_t n, ApeTrans transb, int8_t *mask);
 
 } // namespace ape
