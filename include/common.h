@@ -49,5 +49,7 @@ enum ApeAlgo {
 
 constexpr float FP32F_MAX = 65504.0f;
 constexpr float FP32F_MIN = 3.1e-5f;
+constexpr float FP32B_MAX = 3.38e38f;
+constexpr float FP32B_MIN = 3.9e-34f;
 constexpr int  INT16C_MAX = 32639;
 } // namespace ape

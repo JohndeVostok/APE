@@ -2,7 +2,7 @@
 #include "kernel.h"
 
 namespace ape {
-__global__ void kernel_split_int16_to_int8(int8_t *dst, const int16_t *src, size_t size) {
+__global__ void kernel_split_int16_to_int16c(int8_t *dst, const int16_t *src, size_t size) {
     uint32_t base = 4 * (blockIdx.x * blockDim.x + threadIdx.x);
     uint32_t step = 4 * blockDim.x * gridDim.x;
     for (uint32_t i = base; i < size; i += step) {
@@ -23,11 +23,11 @@ __global__ void kernel_split_int16_to_int8(int8_t *dst, const int16_t *src, size
     return;
 }
 
-void split_int16_to_int8(int8_t *dst, const int16_t *src, size_t size) {
+void split_int16_to_int16c(int8_t *dst, const int16_t *src, size_t size) {
     dim3 grid(NUM_SM, 1, 1);
     dim3 block(MAX_THREAD, 1, 1);
 
-    kernel_split_int16_to_int8<<<grid, block>>>(dst, src, size);
+    kernel_split_int16_to_int16c<<<grid, block>>>(dst, src, size);
     cudaCheckError();
 }
 } // namespace ape

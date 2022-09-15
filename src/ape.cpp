@@ -41,7 +41,7 @@ void apeGemmINT16(ApeTrans transa, ApeTrans transb, int m, int n, int k, const i
         ape_error("Not impl.");
         break;
     case APE_ALGO_INT16:
-        gemm_int16_int8(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+        gemm_int16_int16c(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     default:
         ape_error("Invalid algo.");
