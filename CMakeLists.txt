@@ -11,7 +11,7 @@ set(CUDA_VERBOSE_BUILD on)
 include_directories(include)
 add_subdirectory("src")
 
-set(TESTS test_gemm_fp32_auto test_gemm_fp32_cublas test_gemm_fp32_fp32f test_gemm_fp32_fp32b test_gemm_fp32_fp32t)
+set(TESTS test_gemm_fp32_auto test_gemm_fp32_cublas test_gemm_fp32_fp32f test_gemm_fp32_fp32b test_gemm_fp32_fp32t test_count_overflow_fp32 test_count_overflow_int16 test_create_mask_fp32)
 foreach(TEST IN LISTS TESTS)
     cuda_add_executable(${TEST} test/${TEST}.cpp)
     target_link_libraries(${TEST} ape ape_test -lcublas -lcurand)

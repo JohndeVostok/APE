@@ -1,32 +1,47 @@
+#include "thrust/device_vector.h"
+#include <thrust/transform_reduce.h>
+#include <thrust/functional.h>
 #include "cuda_utils.h"
 #include "kernel.h"
 
 namespace ape {
-__global__ void kernel_create_mask_a_fp32f(const float *src, size_t m, size_t k, ApeTrans transa,
+
+struct OverflowOpFp32
+{
+    __host__ __device__
+        int operator()(const float& x) const { 
+            if (x < FP32F_MIN || x > FP32F_MAX) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+};
+
+__global__ void kernel_create_mask_fp32(const float *src, size_t row, size_t col, ApeTrans trans,
                                                int8_t *mask) {
     extern __shared__ char smem[];
     int8_t *shmem = (int8_t *)&smem[0];
     uint32_t warp_id = threadIdx.y / 32;
     uint32_t lane_id = threadIdx.y % 32;
 
-    if (blockIdx.y * blockDim.y + blockDim.y >= k || blockIdx.x * AUTO_BLOCK + AUTO_BLOCK >= m) {
-        mask[blockIdx.x * gridDim.y + blockIdx.y] = 0;
+    if (blockIdx.y * blockDim.y + threadIdx.y >= col) {
         return;
     }
 
     const float* base;
     size_t step;
-    if (transa == APE_TRANS_T) {    
-        base = src + blockIdx.x * AUTO_BLOCK * k +
-                    blockIdx.y * AUTO_CHUNK + threadIdx.y;
-        step = k;
+    if (trans == APE_TRANS_T) {    
+        base = src + blockIdx.x * AUTO_BLOCK * col +
+                    blockIdx.y * AUTO_BLOCK + threadIdx.y;
+        step = col;
     } else {
-        base = src + blockIdx.y * AUTO_CHUNK * m + blockIdx.x * AUTO_BLOCK + threadIdx.y * m;
+        base = src + blockIdx.y * AUTO_BLOCK * row + blockIdx.x * AUTO_BLOCK + threadIdx.y * row;
         step = 1;
     }
 
     int8_t flag = 1;
-    for (int i = 0; i < AUTO_BLOCK; i++) {
+    for (int i = 0; i < AUTO_BLOCK && blockIdx.x * AUTO_BLOCK + i < row; i++) {
         float tmp = fabs(base[i * step]);
         if (tmp < FP32F_MIN || tmp > FP32F_MAX) {
             flag = 0;
@@ -52,202 +67,33 @@ __global__ void kernel_create_mask_a_fp32f(const float *src, size_t m, size_t k,
                 break;
             }
         }
-        mask[blockIdx.x * gridDim.y + blockIdx.y] = flag;
+
+        if (trans == APE_TRANS_T) {
+            mask[blockIdx.x * gridDim.y + blockIdx.y] = flag;
+        } else {
+            mask[blockIdx.y * gridDim.x + blockIdx.x] = flag;
+        }
     }
 }
 
-void create_mask_a_fp32f(const float *src, size_t m, size_t k, ApeTrans transa,
+void create_mask_fp32(const float *src, size_t row, size_t col, ApeTrans trans,
                                                int8_t *mask) {
-    dim3 grid((m - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
-    dim3 block(1, AUTO_CHUNK, 1);
+    dim3 grid((row - 1) / AUTO_BLOCK + 1, (col - 1) / AUTO_BLOCK + 1, 1);
+    dim3 block(1, AUTO_BLOCK, 1);
 
-    kernel_create_mask_a_fp32f<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int8_t)>>>(src, m, k, transa, mask);
-
-    cudaCheckError();
-}
-
-
-__global__ void kernel_create_mask_b_fp32f(const float *src, size_t k, size_t n, ApeTrans transb,
-                                               int8_t *mask) {
-    extern __shared__ char smem[];
-    int8_t *shmem = (int8_t *)&smem[0];
-    uint32_t warp_id = threadIdx.y / 32;
-    uint32_t lane_id = threadIdx.y % 32;
-
-    if (blockIdx.y * blockDim.y + blockDim.y >= k || blockIdx.x * AUTO_BLOCK + AUTO_BLOCK >= n) {
-        mask[blockIdx.x * gridDim.y + blockIdx.y] = 0;
-        return;
-    }
-
-    const float* base;
-    size_t step;
-    if (transb == APE_TRANS_N) {
-        base = src + blockIdx.x * AUTO_BLOCK * k +
-                    blockIdx.y * AUTO_CHUNK + threadIdx.y;
-        step = k;
-    } else {
-        base = src + blockIdx.x * AUTO_BLOCK +
-                    blockIdx.y * AUTO_CHUNK * n + threadIdx.y * n;
-        step = 1;
-    }
-
-    int8_t flag = 1;
-    for (int i = 0; i < AUTO_BLOCK; i++) {
-        float tmp = fabs(base[i * step]);
-        if (tmp < FP32F_MIN || tmp > FP32F_MAX) {
-            flag = 0;
-        }
-    }
-
-    for (int i = 16; i > 0; i >>= 1) {
-        int tmp = __shfl_down_sync(0xffffffff, flag, i); // warp shuffle
-        if (tmp == 0) {
-            flag = 0;
-        }
-    }
-
-    if (lane_id == 0) {
-        shmem[warp_id] = flag;
-    }
-    __syncthreads();
-
-    if (threadIdx.y == 0) {
-        for (int i = 0; i < (blockDim.y-1) / 32 + 1; i++) {
-            if (shmem[i] == 0) {
-                flag = 0;
-                break;
-            }
-        }
-        mask[blockIdx.x * gridDim.y + blockIdx.y] = flag;
-    }
-}
-
-void create_mask_b_fp32f(const float *src, size_t k, size_t n, ApeTrans transb,
-                                               int8_t *mask) {
-    dim3 grid((n - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
-    dim3 block(1, AUTO_CHUNK, 1);
-
-    kernel_create_mask_b_fp32f<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int8_t)>>>(src, k, n, transb, mask);
+    kernel_create_mask_fp32<<<grid, block, ((AUTO_BLOCK - 1)/32+1) * sizeof (int8_t)>>>(src, row, col, trans, mask);
 
     cudaCheckError();
 }
 
-__global__ void kernel_count_overflow_a_fp32f(const float *src, size_t m, size_t k, ApeTrans transa,
-                                               int8_t *block_count) {
-    extern __shared__ char smem[];
-    int8_t *shmem = (int8_t *)&smem[0];
-    uint32_t warp_id = threadIdx.y / 32;
-    uint32_t lane_id = threadIdx.y % 32;
+int count_overflow_fp32(const float *src, size_t row, size_t col) {
+    OverflowOpFp32    unary_op;
+    thrust::plus<int> binary_op;
+    int init = 0;
 
-    if (blockIdx.y * blockDim.y + threadIdx.y >= k) {
-        return;
-    }
-
-    const float* base;
-    size_t step;
-    if (transa == APE_TRANS_T) {    
-        base = src + blockIdx.x * AUTO_BLOCK * k +
-                    blockIdx.y * AUTO_CHUNK + threadIdx.y;
-        step = k;
-    } else {
-        base = src + blockIdx.y * AUTO_CHUNK * m + blockIdx.x * AUTO_BLOCK + threadIdx.y * m;
-        step = 1;
-    }
-
-    int8_t count = 0;
-    for (int i = 0; i < AUTO_BLOCK && blockIdx.x * AUTO_BLOCK + i < m; i++) {
-        float tmp = fabs(base[i * step]);
-        if (tmp < FP32F_MIN || tmp > FP32F_MAX) {
-            count += 1;
-        }
-    }
-
-    for (int i = 16; i > 0; i >>= 1) {
-        int tmp = __shfl_down_sync(0xffffffff, count, i); // warp shuffle
-        count += tmp;
-    }
-
-    if (lane_id == 0) {
-        shmem[warp_id] = count;
-    }
-    __syncthreads();
-
-    if (threadIdx.y == 0) {
-        count = 0;
-        for (int i = 0; i < (blockDim.y-1) / 32 + 1; i++) {
-            count += shmem[i];
-        }
-        block_count[blockIdx.x * gridDim.y + blockIdx.y] = count;
-    }
-}
-
-void count_overflow_a_fp32f(const float *src, size_t m, size_t k, ApeTrans transa,
-                                               int8_t *block_count) {
-    dim3 grid((m - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
-    dim3 block(1, AUTO_CHUNK, 1);
-
-    kernel_count_overflow_a_fp32f<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int8_t)>>>(src, m, k, transa, block_count);
-
-    cudaCheckError();
-}
-
-__global__ void kernel_count_overflow_b_fp32f(const float *src, size_t k, size_t n, ApeTrans transb,
-                                               int8_t *block_count) {
-    extern __shared__ char smem[];
-    int8_t *shmem = (int8_t *)&smem[0];
-    uint32_t warp_id = threadIdx.y / 32;
-    uint32_t lane_id = threadIdx.y % 32;
-
-    if (blockIdx.y * blockDim.y + threadIdx.y >= k) {
-        return;
-    }
-
-    const float* base;
-    size_t step;
-    if (transb == APE_TRANS_N) {
-        base = src + blockIdx.x * AUTO_BLOCK * k +
-                    blockIdx.y * AUTO_CHUNK + threadIdx.y;
-        step = k;
-    } else {
-        base = src + blockIdx.x * AUTO_BLOCK +
-                    blockIdx.y * AUTO_CHUNK * n + threadIdx.y * n;
-        step = 1;
-    }
-
-    int8_t count = 0;
-    for (int i = 0; i < AUTO_BLOCK && blockIdx.x * AUTO_BLOCK + i < n; i++) {
-        float tmp = fabs(base[i * step]);
-        if (tmp < FP32F_MIN || tmp > FP32F_MAX) {
-            count += 1;
-        }
-    }
-
-    for (int i = 16; i > 0; i >>= 1) {
-        int tmp = __shfl_down_sync(0xffffffff, count, i); // warp shuffle
-        count += tmp;
-    }
-
-    if (lane_id == 0) {
-        shmem[warp_id] = count;
-    }
-    __syncthreads();
-
-    if (threadIdx.y == 0) {
-        count = 0;
-        for (int i = 0; i < (blockDim.y-1) / 32 + 1; i++) {
-            count += shmem[i];
-        }
-        block_count[blockIdx.x * gridDim.y + blockIdx.y] = count;
-    }
-}
-
-void count_overflow_b_fp32f(const float *src, size_t k, size_t n, ApeTrans transb,
-                                               int8_t *block_count) {
-    dim3 grid((n - 1) / AUTO_BLOCK + 1, (k - 1) / AUTO_CHUNK + 1, 1);
-    dim3 block(1, AUTO_CHUNK, 1);
-
-    kernel_count_overflow_b_fp32f<<<grid, block, ((AUTO_CHUNK - 1)/32+1) * sizeof (int8_t)>>>(src, k, n, transb, block_count);
-
-    cudaCheckError();
+    thrust::device_ptr<float> d_src(const_cast<float*>(src));
+    int count = thrust::transform_reduce(d_src, d_src+row*col, unary_op, init, binary_op);
+    
+    return count;
 }
 } // namespace gemm

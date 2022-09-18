@@ -6,7 +6,6 @@ namespace ape {
 constexpr int NUM_SM = 108;
 constexpr int MAX_THREAD = 1024;
 constexpr int AUTO_BLOCK = 128;
-constexpr int AUTO_CHUNK = 64;
 
 void gemm_fp32_auto(ApeTrans transa, ApeTrans transb, int m, int n, int k, const float *alpha, const float *A, int lda,
                     const float *B, int ldb, const float *beta, float *C, int ldc);
@@ -39,17 +38,8 @@ void merge_tf32_to_fp32(float *dst, const float *src, size_t size);
 void split_int16_to_int16c(int8_t* dst, const int16_t* src, size_t size);
 void merge_int16c_to_int16(int16_t* dst, const int8_t* src, size_t size);
 
-void create_mask_a_fp32f(const float *src, size_t m, size_t k, ApeTrans transa, int8_t *mask);
-void create_mask_b_fp32f(const float *src, size_t k, size_t n, ApeTrans transb, int8_t *mask);
-void count_overflow_a_fp32f(const float *src, size_t m, size_t k, ApeTrans transa, int8_t *block_count);
-void count_overflow_b_fp32f(const float *src, size_t k, size_t n, ApeTrans transb, int8_t *block_count);
-void create_mask_a_fp32b(const float *src, size_t m, size_t k, ApeTrans transa, int8_t *mask);
-void create_mask_b_fp32b(const float *src, size_t k, size_t n, ApeTrans transb, int8_t *mask);
-void count_overflow_a_fp32b(const float *src, size_t m, size_t k, ApeTrans transa, int8_t *block_count);
-void count_overflow_b_fp32b(const float *src, size_t k, size_t n, ApeTrans transb, int8_t *block_count);
-void create_mask_a_int16c(const int16_t *src, size_t m, size_t k, ApeTrans transa, int8_t *mask);
-void create_mask_b_int16c(const int16_t *src, size_t k, size_t n, ApeTrans transb, int8_t *mask);
-void count_overflow_b_int16c(const int16_t *src, size_t k, size_t n, ApeTrans transb, int8_t *block_count);
-void count_overflow_a_int16c(const int16_t *src, size_t m, size_t k, ApeTrans transa, int8_t *block_count);
+void create_mask_fp32(const float *src, size_t row, size_t col, ApeTrans trans, int8_t *mask);
+int count_overflow_fp32(const float *src, size_t row, size_t col);
+int count_overflow_int16c(const int16_t *src, size_t row, size_t col);
 
 } // namespace ape
