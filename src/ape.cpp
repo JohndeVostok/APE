@@ -6,17 +6,18 @@
 
 namespace ape {
 
-void apeGemmFP64(ApeTrans transa, ApeTrans transb, int m, int n, int k, const double *alpha, const double *A, int lda,
-                 const double *B, int ldb, const double *beta, double *C, int ldc, ApeAlgo algo) {
-    gemm_fp64_cublas(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+void apeInit(const size_t buf_size) {
+    APEHandler::initCublas();
+    if (buf_size > 0) {
+        APEHandler::initBuffer(buf_size);
+    }
 }
 
 void apeGemmFP32(ApeTrans transa, ApeTrans transb, int m, int n, int k, const float *alpha, const float *A, int lda,
-                 const float *B, int ldb, const float *beta, float *C, int ldc, ApeAlgo algo) {
+                 const float *B, int ldb, const float *beta, float *C, int ldc, const ApeAlgo algo) {
     switch (algo) {
     case APE_ALGO_AUTO:
-        ape_error("Not impl.");
-        break;
+        assert(false);
     case APE_ALGO_CUBLAS:
         gemm_fp32_cublas(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
@@ -30,7 +31,21 @@ void apeGemmFP32(ApeTrans transa, ApeTrans transb, int m, int n, int k, const fl
         gemm_fp32_fp32t(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     default:
-        ape_error("Invalid algo.");
+        assert(false);
+    }
+}
+
+void apeGemmFP64(ApeTrans transa, ApeTrans transb, int m, int n, int k, const double *alpha, const double *A, int lda,
+                 const double *B, int ldb, const double *beta, double *C, int ldc, ApeAlgo algo) {
+    switch (algo) {
+    case APE_ALGO_AUTO:
+        gemm_fp64_cublas(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+        break;
+    case APE_ALGO_CUBLAS:
+        gemm_fp64_cublas(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+        break;
+    default:
+        assert(false);
     }
 }
 
@@ -38,13 +53,13 @@ void apeGemmINT16(ApeTrans transa, ApeTrans transb, int m, int n, int k, const i
                   const int16_t *B, int ldb, const int32_t *beta, int32_t *C, int ldc, ApeAlgo algo) {
     switch (algo) {
     case APE_ALGO_AUTO:
-        ape_error("Not impl.");
+        gemm_int16_emu(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     case APE_ALGO_INT16:
-        gemm_int16_int8(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+        gemm_int16_emu(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
         break;
     default:
-        ape_error("Invalid algo.");
+        assert(false);
     }
 }
 

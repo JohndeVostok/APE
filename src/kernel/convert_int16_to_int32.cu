@@ -1,4 +1,4 @@
-#include "cuda_utils.h"
+#include "common.h"
 #include "kernel.h"
 
 namespace ape {
