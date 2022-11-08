@@ -6,7 +6,7 @@ namespace ape {
 void gemm_fp32_fp32t(ApeTrans transa, ApeTrans transb, int m, int n, int k, const float *alpha, const float *A, int lda,
                      const float *B, int ldb, const float *beta, float *C, int ldc) {
     assert((m * k + k * n) * 8 <= APEHandler::getBufSize());
-    float *buf = (float *) APEHandler::getBuf();
+    float *buf = (float *)APEHandler::getBuf();
     float *buf_a, *buf_b;
     buf_a = buf;
     buf_b = buf + m * k * 2;

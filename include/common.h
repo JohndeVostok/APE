@@ -131,10 +131,7 @@ class APEHandler {
         getInstance()->buf = buf;
     }
     static inline size_t getBufSize() { return getInstance()->buf_size; }
-    static inline void* getBuf() { return getInstance()->buf; }
+    static inline void *getBuf() { return getInstance()->buf; }
 };
-
-__device__ inline double fmax(double a, double b) { return (a > b) ? a : b; }
-__device__ inline double fabs(double a) { return (a > 0) ? a : -a; }
 
 } // namespace ape

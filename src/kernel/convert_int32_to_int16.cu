@@ -9,10 +9,8 @@ __global__ void kernel_convert_int32_to_int16(int16_t *dst, const int32_t *src, 
     for (uint32_t i = base; i < size; i += step) {
         int2 base = (int2 &)src[i];
         short2 buf;
-
         buf.x = short(base.x);
         buf.y = short(base.y);
-
         (short2 &)dst[i] = buf;
     }
     return;
@@ -21,7 +19,6 @@ __global__ void kernel_convert_int32_to_int16(int16_t *dst, const int32_t *src, 
 void convert_int32_to_int16(int16_t *dst, const int32_t *src, size_t size) {
     dim3 grid(NUM_SM, 1, 1);
     dim3 block(MAX_THREAD, 1, 1);
-
     kernel_convert_int32_to_int16<<<grid, block>>>(dst, src, size);
     cudaCheckError();
 }

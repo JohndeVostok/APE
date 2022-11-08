@@ -11,11 +11,9 @@ __global__ void kernel_merge_bf16_to_fp32(float *dst, const __nv_bfloat16 *src, 
         a0 = (__nv_bfloat162 &)src[i];
         a1 = (__nv_bfloat162 &)src[i + size];
         a2 = (__nv_bfloat162 &)src[i + size * 2];
-
         float2 b;
         b.x = float(a0.x) + float(a1.x) + float(a2.x);
         b.y = float(a0.y) + float(a1.y) + float(a2.y);
-
         (float2 &)dst[i] = b;
     }
     return;

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 
 namespace ape {
 
@@ -12,12 +13,34 @@ enum ApeTrans {
 
 enum ApeAlgo {
     APE_ALGO_AUTO = 1,
+    APE_ALGO_AUTO_STRICT,
     APE_ALGO_CUBLAS,
     APE_ALGO_FP32F,
     APE_ALGO_FP32B,
     APE_ALGO_FP32T,
     APE_ALGO_INT16,
 };
+
+inline std::string getApeAlgoName(ApeAlgo algo) {
+    switch (algo) {
+    case APE_ALGO_AUTO:
+        return "AUTO";
+    case APE_ALGO_AUTO_STRICT:
+        return "AUTO_STRICT";
+    case APE_ALGO_CUBLAS:
+        return "CUBLAS";
+    case APE_ALGO_FP32F:
+        return "FP32F";
+    case APE_ALGO_FP32B:
+        return "FP32B";
+    case APE_ALGO_FP32T:
+        return "FP32T";
+    case APE_ALGO_INT16:
+        return "INT16";
+    default:
+        return "Invalid";
+    }
+}
 
 void apeInit(const size_t buf_size = 0);
 

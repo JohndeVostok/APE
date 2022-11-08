@@ -14,7 +14,6 @@ __global__ void kernel_split_fp32_to_bf16(__nv_bfloat16 *dst, const float *src, 
         buf[1].y = __float2bfloat16(base.y - float(buf[0].y));
         buf[2].x = __float2bfloat16(base.x - float(buf[0].x) - float(buf[1].x));
         buf[2].y = __float2bfloat16(base.y - float(buf[0].y) - float(buf[1].y));
-
         (__nv_bfloat162 &)dst[i] = buf[0];
         (__nv_bfloat162 &)dst[size + i] = buf[1];
         (__nv_bfloat162 &)dst[size * 2 + i] = buf[2];

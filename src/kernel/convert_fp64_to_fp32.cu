@@ -6,7 +6,6 @@ namespace ape {
 __global__ void kernel_convert_fp64_to_fp32(float *dst, const double *src, size_t size) {
     size_t base = 2 * (blockIdx.x * blockDim.x + threadIdx.x);
     size_t step = 2 * blockDim.x * gridDim.x;
-
     for (size_t i = base; i < size; i += step) {
         double2 base = (double2 &)src[i];
         float2 buf;

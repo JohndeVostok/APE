@@ -6,7 +6,7 @@ namespace ape {
 void gemm_int16_emu(ApeTrans transa, ApeTrans transb, int m, int n, int k, const int16_t *alpha, const int16_t *A, int lda,
                     const int16_t *B, int ldb, const int32_t *beta, int32_t *C, int ldc) {
     assert((m * k + k * n) * 2 <= APEHandler::getBufSize());
-    int8_t *buf = (int8_t *) APEHandler::getBuf();
+    int8_t *buf = (int8_t *)APEHandler::getBuf();
     int8_t *buf_a, *buf_b;
     buf_a = buf;
     buf_b = buf + m * k * 2;

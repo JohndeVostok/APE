@@ -6,17 +6,20 @@ namespace ape {
 void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
     int width;
     switch (algo) {
-        case APE_ALGO_FP32F:
-        width = 4;
-        break;
-        case APE_ALGO_FP32B:
-        width = 6;
-        break;
-        case APE_ALGO_FP32T:
+    case APE_ALGO_AUTO:
         width = 8;
         break;
-        default:
-        width = 1;
+    case APE_ALGO_FP32F:
+        width = 4;
+        break;
+    case APE_ALGO_FP32B:
+        width = 6;
+        break;
+    case APE_ALGO_FP32T:
+        width = 8;
+        break;
+    default:
+        width = 0;
     }
     apeInit((m * k + k * n) * width);
     float *data_eval_a = 0, *data_eval_b = 0, *data_eval_c = 0;
@@ -66,7 +69,7 @@ void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
     cudaEventElapsedTime(&duration, st, ed);
     double perf = double(m) * double(n) * double(k) * 2.0f * 128.0f / duration / 1e9;
 
-    std::cout << "[TEST] test_error: (" << m << " " << n << " " << k << ") max_error: " << max_error
+    std::cout << "[TEST] " << getApeAlgoName(algo) << " (" << m << " " << n << " " << k << ") max_error: " << max_error
               << " mean_error: " << mean_error << " perf(TFLOPS): " << perf << std::endl;
     cudaFree(data_eval_a);
     cudaFree(data_eval_b);
