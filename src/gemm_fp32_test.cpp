@@ -1,11 +1,24 @@
 #include "ape.h"
-#include "cuda_utils.h"
-#include "curand.h"
+#include "common.h"
 #include "kernel.h"
 
 namespace ape {
-namespace test {
 void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
+    int width;
+    switch (algo) {
+        case APE_ALGO_FP32F:
+        width = 4;
+        break;
+        case APE_ALGO_FP32B:
+        width = 6;
+        break;
+        case APE_ALGO_FP32T:
+        width = 8;
+        break;
+        default:
+        width = 1;
+    }
+    apeInit((m * k + k * n) * width);
     float *data_eval_a = 0, *data_eval_b = 0, *data_eval_c = 0;
     cudaSafeCall(cudaMalloc((void **)&data_eval_a, m * k * sizeof(float)));
     cudaSafeCall(cudaMalloc((void **)&data_eval_b, k * n * sizeof(float)));
@@ -51,7 +64,7 @@ void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
     cudaEventSynchronize(st);
     cudaEventSynchronize(ed);
     cudaEventElapsedTime(&duration, st, ed);
-    double perf = double(m) * double(n) * double(k) * 2.0f * 128.0f / duration / 1024.0f / 1024.0f / 1024.0f;
+    double perf = double(m) * double(n) * double(k) * 2.0f * 128.0f / duration / 1e9;
 
     std::cout << "[TEST] test_error: (" << m << " " << n << " " << k << ") max_error: " << max_error
               << " mean_error: " << mean_error << " perf(TFLOPS): " << perf << std::endl;
@@ -63,5 +76,4 @@ void test_gemm_fp32(int m, int n, int k, ape::ApeAlgo algo) {
     cudaFree(data_res_c);
 }
 
-} // namespace test
 } // namespace ape
