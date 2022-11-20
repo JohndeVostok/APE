@@ -52,6 +52,10 @@ INT16 GEMM supports $2$ algorithms:
 
 * **APE_ALGO_INT16**: Use INT8 emulate INT16. (The upper bound is $32639$. Native INT16's is $32767$. Overflow may occur.)
 
+## Authors
+- [Zixuan Ma](https://github.com/JohndeVostok)
+- [Yanzhuo Chen](https://github.com/yz-chen18)
+
 
 ## Citation
 
