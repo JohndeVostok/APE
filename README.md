@@ -1,5 +1,9 @@
 # APE on CUDA
 
+**Integrated into cuBLAS 13.1**
+
+The floating-point emulation method in this project is now intergrated as a basic feature of NVIDIA cuBLAS in CUDA 13.1 and later. You can read the details in the [official cuBLAS documentation](https://docs.nvidia.com/cuda/cublas/#floating-point-emulation).
+
 This project is an APE implementation on NVIDIA GPU using the cuBLAS backend.
 
 APE is a method of emulating high-bitwidth computation with low-bitwidth data types.
